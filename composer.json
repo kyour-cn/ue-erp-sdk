@@ -1,0 +1,26 @@
+{
+  "name": "kyour-cn/ue-erp-sdk",
+  "type": "library",
+  "keywords": ["php", "erp", "ue", "sdk"],
+  "homepage" : "https://github.com/kyour-cn/ue-erp-sdk",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Kyour",
+      "email": "kyour@vip.qq.com"
+    }
+  ],
+  "description": "The ue erp sdk.",
+  "require": {
+    "php": ">=7.3",
+    "guzzlehttp/guzzle": ">= 6.3"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "files": [],
+    "psr-4": {
+      "kyour\\ueerp": "src/"
+    }
+  }
+}
