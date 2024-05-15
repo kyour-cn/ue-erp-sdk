@@ -20,7 +20,7 @@
   "autoload": {
     "files": [],
     "psr-4": {
-      "kyour\\ueerp": "src/"
+      "kyour\\ueerp\\": "src/"
     }
   }
 }
