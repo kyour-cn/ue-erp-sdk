@@ -4,7 +4,9 @@ namespace kyour\ueerp;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use kyour\ueerp\exception\UeAuthException;
 use kyour\ueerp\exception\UeRequestException;
+use Throwable;
 
 class UeClient
 {
@@ -21,7 +23,6 @@ class UeClient
     public function __construct(UeConfig $config)
     {
         $this->config = $config;
-
     }
 
     /**
@@ -29,7 +30,7 @@ class UeClient
      * @return array
      * @throws UeRequestException
      */
-    public function getToken(): array
+    public function login(): array
     {
         // 登录参数
         $data = [
@@ -67,16 +68,40 @@ class UeClient
     }
 
     /**
+     * 设置token
+     * @param $token
+     * @return void
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * 获取token
+     * @return string
+     */
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    /**
      * @param string $method
      * @param string $url
      * @param array $data
      * @param array $params
      * @return mixed
-     * @throws UeRequestException
+     * @throws UeRequestException|UeAuthException
      */
     public function request(string $method, string $url, array $data = [], array $params = [])
     {
         $client = new Client();
+
+        // 判断是否有token
+        if(empty($this->token)) {
+            throw new UeAuthException('没有token', -1);
+        }
 
         try{
 
@@ -100,11 +125,32 @@ class UeClient
         }
 
         if ($response->getStatusCode() == 200) {
-            $body = $response->getBody();
-            return json_decode($body->getContents(), true);
+            $body = $response->getBody()->getContents();
+            $body = json_decode($body, true);
+
+            if(isset($body['code']) and $body['code'] == '401') {
+                throw new UeAuthException('token失效', -1);
+            }
+            return $body;
         }else{
             throw new UeRequestException('请求失败');
         }
+    }
+
+    /**
+     * 检测token是否有效
+     * @return bool
+     */
+    public function checkToken(): bool
+    {
+        $url = $this->config->gateway. "/core/ajax/organization/ownedList";
+
+        try {
+            $res = $this->request('GET', $url);
+        }catch (Throwable $e) {
+            return false;
+        }
+        return true;
     }
 
 }
