@@ -1,4 +1,4 @@
-<?php declare (strict_types = 1);
+<?php declare (strict_types=1);
 
 namespace kyour\ueerp;
 
@@ -41,28 +41,28 @@ class UeClient
             'platformLogin' => false,
         ];
 
-        $url = $this->config->gateway. "/ue/erp/cloud/domain/security/login";
+        $url = $this->config->gateway . "/ue/erp/cloud/domain/security/login";
 
         $client = new Client();
 
-        try{
+        try {
             $response = $client->request('POST', $url, [
                 'json' => $data,
             ]);
-        }catch (GuzzleException $ge) {
+        } catch (GuzzleException $ge) {
             throw new UeRequestException($ge->getMessage());
         }
 
         if ($response->getStatusCode() == 200) {
             $body = $response->getBody();
             $body = json_decode($body->getContents(), true);
-            if($body['success']) {
+            if ($body['success']) {
                 $this->token = $body['data']['oauthToken']['access_token'];
                 return $body['data'];
-            }else{
+            } else {
                 throw new UeRequestException($body['error']['errorMessage']);
             }
-        }else{
+        } else {
             throw new UeRequestException('请求失败');
         }
     }
@@ -99,18 +99,18 @@ class UeClient
         $client = new Client();
 
         // 判断是否有token
-        if(empty($this->token)) {
+        if (empty($this->token)) {
             throw new UeAuthException('没有token', -1);
         }
 
-        try{
+        try {
 
             // 添加token
-            if(isset($params['headers'])) {
+            if (isset($params['headers'])) {
                 $params['headers'] = array_merge($params['headers'], [
                     'Cookie' => "thanos_op_token=$this->token;",
                 ]);
-            }else{
+            } else {
                 $params['headers'] = [
                     'Cookie' => "thanos_op_token=$this->token;",
                 ];
@@ -119,8 +119,8 @@ class UeClient
             $params['json'] = $data;
 
             // 发送请求
-            $response = $client->request($method, $this->config->gateway. $url, $params);
-        }catch (GuzzleException $ge) {
+            $response = $client->request($method, $this->config->gateway . $url, $params);
+        } catch (GuzzleException $ge) {
             throw new UeRequestException($ge->getMessage());
         }
 
@@ -128,11 +128,11 @@ class UeClient
             $body = $response->getBody()->getContents();
             $body = json_decode($body, true);
 
-            if(isset($body['code']) and $body['code'] == '401') {
+            if (isset($body['code']) and $body['code'] == '401') {
                 throw new UeAuthException('token失效', -1);
             }
             return $body;
-        }else{
+        } else {
             throw new UeRequestException('请求失败');
         }
     }
@@ -143,11 +143,11 @@ class UeClient
      */
     public function checkToken(): bool
     {
-        $url = $this->config->gateway. "/core/ajax/organization/ownedList";
+        $url = "/core/ajax/organization/ownedList";
 
         try {
-            $res = $this->request('GET', $url);
-        }catch (Throwable $e) {
+            $this->request('GET', $url);
+        } catch (Throwable $e) {
             return false;
         }
         return true;
